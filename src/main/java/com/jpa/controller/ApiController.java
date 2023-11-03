@@ -11,10 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -74,7 +77,26 @@ public class ApiController {
     }
 
     @PostMapping(value = "/products")
-    public Page<ProductEntity> products(@RequestBody ProductEntity dto) {
+    public Page<ProductEntity> products(@RequestBody ProductEntity dto) throws InterruptedException {
+//        TimeUnit.SECONDS.sleep(4);
         return apiService.getProductList(dto);
     }
+
+    @CrossOrigin
+    @PostMapping("/getStaffList")
+    public JsonNode getStaffList() throws JsonProcessingException {
+        String jsonStr = """
+                [
+                    {"name": "Sarah", "age": "19", "role": "Student"},
+                    {"name": "Janine", "age": "43", "role": "Professor"},
+                    {"name": "William", "age": "27", "role": "Associate Professor"}
+                  ]""";
+        JsonNode jsonNode = customObjectMapper.readTree(jsonStr);
+        return jsonNode;
+    }
+
+//    @PostMapping(value = "/products")
+//    public ResponseEntity products(@RequestBody ProductEntity dto) {
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//    }
 }
