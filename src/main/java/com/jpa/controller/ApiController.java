@@ -4,6 +4,9 @@ package com.jpa.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 import com.jpa.dto.LoginRequest;
 import com.jpa.entity.ProductEntity;
 import com.jpa.service.ApiService;
@@ -11,13 +14,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @RestController
@@ -31,6 +35,7 @@ public class ApiController {
 
     @PostMapping("/login")
     public String login(@RequestBody LoginRequest dto) {
+        System.out.println(Thread.currentThread());
         if(!dto.getUsername().equals("0767786939")) {
             return """
                     {
@@ -84,7 +89,8 @@ public class ApiController {
 
     @CrossOrigin
     @PostMapping("/getStaffList")
-    public JsonNode getStaffList() throws JsonProcessingException {
+    public JsonNode getStaffList(@RequestBody LoginRequest dto) throws Exception {
+        System.out.println("username: " + dto.getUsername());
         String jsonStr = """
                 [
                     {"name": "Sarah", "age": "19", "role": "Student"},
@@ -92,11 +98,38 @@ public class ApiController {
                     {"name": "William", "age": "27", "role": "Associate Professor"}
                   ]""";
         JsonNode jsonNode = customObjectMapper.readTree(jsonStr);
+//        TimeUnit.SECONDS.sleep(3);
         return jsonNode;
     }
 
-//    @PostMapping(value = "/products")
-//    public ResponseEntity products(@RequestBody ProductEntity dto) {
-//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//    }
+    @GetMapping(value = "/threadName")
+    public String threadName() {
+        return Thread.currentThread().toString();
+    }
+
+    @PostMapping("/upload")
+    public void upload(@RequestParam("file") MultipartFile file) {
+        ChannelSftp channelSftp = null;
+        Session session = null;
+        try(InputStream inputStream = file.getInputStream()) {
+            var jsch = new JSch();
+//            System.setProperty("jsch.debug", "true");
+            session = jsch.getSession("centos", "51.79.145.101", 22);
+            session.setPassword("VQYKprnEJB3D");
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.setTimeout(10000);
+            session.connect();
+            channelSftp = (ChannelSftp) session.openChannel("sftp");
+            channelSftp.connect();
+            channelSftp.cd("/home/centos/");
+            channelSftp.put(inputStream, "report.xlsx");
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }finally {
+            if(channelSftp != null && channelSftp.isConnected()) channelSftp.disconnect();
+            if(session != null && session.isConnected()) session.disconnect();
+        }
+    }
+
 }

@@ -4,10 +4,15 @@ server:
   undertow.max-http-post-size: 0
 spring:
   application.name: demo
-  main.allow-bean-definition-overriding: true
+  threads.virtual.enabled: true
   profiles:
     active: dev
+  main.allow-bean-definition-overriding: true
   jackson.default-property-inclusion: non_absent
+  freemarker.check-template-location: false
+  servlet.multipart.max-file-size: 5MB
+  servlet.multipart.max-request-size: 5MB
+  servlet.multipart.resolve-lazily: true
   jpa:
     database: default
     database-platform: org.hibernate.dialect.H2Dialect
@@ -20,6 +25,10 @@ spring:
   h2:
     console:
       enabled: true
+
+grpc:
+  server:
+    port: 3001
 
 logging:
   level:

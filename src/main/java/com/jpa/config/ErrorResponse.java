@@ -1,4 +1,4 @@
-package com.jpa.configuration;
+package com.jpa.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

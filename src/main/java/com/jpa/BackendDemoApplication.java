@@ -13,9 +13,9 @@ import java.util.ArrayList;
 @Slf4j
 @RequiredArgsConstructor
 @SpringBootApplication
-public class DemoApplication implements CommandLineRunner {
+public class BackendDemoApplication implements CommandLineRunner {
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+        SpringApplication.run(BackendDemoApplication.class, args);
     }
 
     final ProductRepository productRepository;

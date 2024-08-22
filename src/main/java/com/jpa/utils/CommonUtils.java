@@ -1,7 +1,10 @@
-package com.jpa.common;
+package com.jpa.utils;
 
+import com.jpa.constant.ResponseStatus;
+import com.jpa.dto.ResultDto;
+import com.jpa.exceptions.CommonException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class FunctionCommonUtils {
+public class CommonUtils {
     final Environment env;
 
     public LocalDateTime milisecondToLocaleDate(long millis) {
@@ -87,4 +91,23 @@ public class FunctionCommonUtils {
 //		result.put("signature", signature);
 //		return result;
 //	}
+
+    public <T> ResultDto<T> handleApi(ExcuteApi<T> excuteApi) {
+        try {
+            var data = excuteApi.apply();
+            return new ResultDto<T>()
+                    .setStatus(ResponseStatus.SUCCESS.getCode())
+                    .setData(data);
+        }catch (CommonException e) {
+            log.error("CommonExceptionHandle: " + e.getMessage(), e);
+            return new ResultDto<T>()
+                    .setStatus(ResponseStatus.ERROR.getCode())
+                    .setMessage(e.getMessage());
+        }catch (Exception e) {
+            log.error("ExceptionHandle: " + e.getMessage(), e);
+            return new ResultDto<T>()
+                    .setStatus(ResponseStatus.ERROR.getCode())
+                    .setMessage(e.getMessage());
+        }
+    }
 }

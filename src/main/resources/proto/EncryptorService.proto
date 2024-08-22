@@ -1,0 +1,20 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.jpa.grpc";
+
+service EncryptorService {
+  rpc encrypt(GrpcRequest) returns  (GrpcResponse);
+  rpc decrypt(GrpcRequest) returns  (GrpcResponse);
+}
+
+message GrpcRequest {
+  string lmid = 1;
+  string data = 2;
+}
+
+message GrpcResponse {
+  string lmid = 1;
+  string data = 2;
+  string responseCode = 3;
+  string description = 4;
+}
