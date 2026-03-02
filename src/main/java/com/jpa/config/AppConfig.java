@@ -2,8 +2,10 @@ package com.jpa.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.TimeZone;
 
 @EnableAsync
 @Configuration
@@ -32,6 +35,23 @@ public class AppConfig {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return mapper;
+    }
+
+    @Bean(name = "customJsonMapper")
+    public JsonMapper getJsonMapper() {
+        JsonMapper mapper = JsonMapper.builder()
+                .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
+//                .serializationInclusion(JsonInclude.Include.NON_NULL)
+//                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+                .build();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
+//        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE); firstName	first-name
         return mapper;
     }
 
